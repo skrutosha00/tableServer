@@ -1,0 +1,6 @@
+/node_modules
+
+/testData
+/testScripts
+
+.env
