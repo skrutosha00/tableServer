@@ -1,10 +1,10 @@
 import pushTransaction from "#root/functions/pushTransaction.js";
 
-const moveService = "moveback";
+const moveService = process.env.MOVE_SERVICE;
 
 export async function addMoves(moves) {
   moves.forEach((move) => {
-    let rows = ["ingame", "invested"];
+    const rows = ["ingame", "invested"];
 
     for (let row of rows) {
       if (move[row]) {
@@ -29,7 +29,7 @@ export async function removeMoves(moveIds) {
 }
 
 export async function removeAllMoves() {
-  const dataSource = `https://${moveService}.royfractal.com/graphql?query={move_rows{edges{node{id}}}}`;
+  const dataSource = `https://${moveService}.${process.env.PSIBASE_DOMAIN}/graphql?query={move_rows{edges{node{id}}}}`;
 
   const fetchedIds = await fetch(dataSource)
     .then((data) => data.json())
@@ -46,8 +46,6 @@ export async function removeAllMoves() {
   if (!fetchedIds) {
     return "Failed to fetch moves";
   }
-
-  console.log(fetchedIds);
 
   const pushResult = await pushTransaction(moveService, "removeMoves", {
     json: JSON.stringify(fetchedIds)

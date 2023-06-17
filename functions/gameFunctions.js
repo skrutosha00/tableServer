@@ -4,7 +4,7 @@ const gameService = process.env.GAME_SERVICE;
 
 export async function addGames(games) {
   games.forEach((game) => {
-    let rows = [
+    const rows = [
       "ingame",
       "invested",
       "payout",
@@ -42,7 +42,7 @@ export async function removeGames(gameIds) {
 }
 
 export async function removeAllGames() {
-  const dataSource = `https://${gameService}.royfractal.com/graphql?query={game_rows{edges{node{id}}}}`;
+  const dataSource = `https://${gameService}.${process.env.PSIBASE_DOMAIN}/graphql?query={game_rows{edges{node{id}}}}`;
 
   const fetchedIds = await fetch(dataSource)
     .then((data) => data.json())
@@ -59,8 +59,6 @@ export async function removeAllGames() {
   if (!fetchedIds) {
     return "Failed to fetch games";
   }
-
-  console.log(fetchedIds);
 
   const pushResult = await pushTransaction(gameService, "removeGames", {
     json: JSON.stringify(fetchedIds)

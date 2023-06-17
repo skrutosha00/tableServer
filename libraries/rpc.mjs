@@ -2,7 +2,7 @@ import {
   privateStringToKeyPair,
   publicKeyPairToFracpack,
   signatureToFracpack
-} from "https://royfractal.com/common/keyConversions.mjs";
+} from `https://${process.env.PSIBASE_DOMAIN}/common/keyConversions.mjs`;
 import hashJs from "https://cdn.skypack.dev/hash.js";
 
 /** Global Values */
