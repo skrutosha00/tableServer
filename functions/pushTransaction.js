@@ -11,7 +11,7 @@ export default async function pushTransaction(
   data,
   keys = privateKeys
 ) {
-  const baseUrl = `https://${service}.${process.env.PSIBASE_DOMAIN}.com`;
+  const baseUrl = `https://${service}.${process.env.PSIBASE_DOMAIN}`;
 
   const transaction = {
     tapos: {
