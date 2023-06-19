@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 
 app.post("/:action", async (req, res) => {
   if (!hasValidKey(req.body)) {
-    res.send("Invalid key");
+    res.status(403).send("Invalid key");
     return;
   }
 
@@ -31,5 +31,13 @@ app.post("/:action", async (req, res) => {
 
   const pushResult = await actionFunction(actionParam);
 
-  res.send(pushResult);
+  let status = 200;
+
+  if (pushResult == "There is no such method") {
+    status = 404;
+  } else if (pushResult != "OK") {
+    status = 500;
+  }
+
+  res.status(status).send(pushResult);
 });

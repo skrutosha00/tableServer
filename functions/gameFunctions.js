@@ -16,7 +16,11 @@ export async function addGames(games) {
       "forum_payout",
       "liquidity_payout",
       "apple_payout",
-      "auto_payout"
+      "auto_payout",
+      "market_makers_payout",
+      "salary_payout",
+      "investors_payout",
+      "housing_payout"
     ];
 
     for (let row of rows) {

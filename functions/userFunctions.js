@@ -4,7 +4,7 @@ const userService = process.env.USER_SERVICE;
 
 export async function addUsers(users) {
   users.forEach((user) => {
-    const rows = ["umi_balance", "glize_balance"];
+    const rows = ["glize_balance"];
 
     for (let row of rows) {
       if (user[row]) {
