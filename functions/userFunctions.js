@@ -29,27 +29,6 @@ export async function removeUsers(userIds) {
 }
 
 export async function removeAllUsers() {
-  const dataSource = `https://${userService}.${process.env.PSIBASE_DOMAIN}/graphql?query={user_rows{edges{node{id}}}}`;
-
-  const fetchedIds = await fetch(dataSource)
-    .then((data) => data.json())
-    .then((data) => {
-      const ids = [];
-
-      data.data.user_rows.edges.forEach((edge) => {
-        ids.push(+edge.node.id);
-      });
-
-      return ids;
-    });
-
-  if (!fetchedIds) {
-    return "Failed to fetch users";
-  }
-
-  const pushResult = await pushTransaction(userService, "removeUsers", {
-    json: JSON.stringify(fetchedIds)
-  });
-
+  const pushResult = await pushTransaction(userService, "removeAllUsers");
   return pushResult;
 }

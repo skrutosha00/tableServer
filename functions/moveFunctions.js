@@ -29,27 +29,6 @@ export async function removeMoves(moveIds) {
 }
 
 export async function removeAllMoves() {
-  const dataSource = `https://${moveService}.${process.env.PSIBASE_DOMAIN}/graphql?query={move_rows{edges{node{id}}}}`;
-
-  const fetchedIds = await fetch(dataSource)
-    .then((data) => data.json())
-    .then((data) => {
-      const ids = [];
-
-      data.data.move_rows.edges.forEach((edge) => {
-        ids.push(+edge.node.id);
-      });
-
-      return ids;
-    });
-
-  if (!fetchedIds) {
-    return "Failed to fetch moves";
-  }
-
-  const pushResult = await pushTransaction(moveService, "removeMoves", {
-    json: JSON.stringify(fetchedIds)
-  });
-
+  const pushResult = await pushTransaction(moveService, "removeAllMoves");
   return pushResult;
 }

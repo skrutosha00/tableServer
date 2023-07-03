@@ -46,27 +46,6 @@ export async function removeGames(gameIds) {
 }
 
 export async function removeAllGames() {
-  const dataSource = `https://${gameService}.${process.env.PSIBASE_DOMAIN}/graphql?query={game_rows{edges{node{id}}}}`;
-
-  const fetchedIds = await fetch(dataSource)
-    .then((data) => data.json())
-    .then((data) => {
-      const ids = [];
-
-      data.data.game_rows.edges.forEach((edge) => {
-        ids.push(+edge.node.id);
-      });
-
-      return ids;
-    });
-
-  if (!fetchedIds) {
-    return "Failed to fetch games";
-  }
-
-  const pushResult = await pushTransaction(gameService, "removeGames", {
-    json: JSON.stringify(fetchedIds)
-  });
-
+  const pushResult = await pushTransaction(gameService, "removeAllGames");
   return pushResult;
 }

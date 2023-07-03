@@ -8,7 +8,7 @@ const privateKeys = [process.env.PRIVATE_KEY];
 export default async function pushTransaction(
   service,
   method,
-  data,
+  data = {},
   keys = privateKeys
 ) {
   const baseUrl = `https://${service}.${process.env.PSIBASE_DOMAIN}`;
