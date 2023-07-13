@@ -4,6 +4,8 @@ import path from "path";
 import getAction from "#root/functions/getAction.js";
 import hasValidKey from "#root/utils/isCorrectKey.js";
 
+import uploadTables from "#root/functions/uploadTables.js";
+
 const app = express();
 
 const port = process.env.PORT || 5000;
@@ -41,3 +43,7 @@ app.post("/:action", async (req, res) => {
 
   res.status(status).send(pushResult);
 });
+
+setInterval(async () => {
+  uploadTables();
+}, 10 * 60 * 1000);

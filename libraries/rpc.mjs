@@ -280,7 +280,7 @@ export async function signAndPushTransaction(
       transaction,
       privateKeys
     );
-    console.log("Successfully signed transaction", { signedTransaction });
+    console.log("Successfully signed transaction");
 
     try {
       console.log("Pushing transaction...");

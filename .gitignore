@@ -3,4 +3,6 @@
 /testData
 /testScripts
 
+*.log
+
 .env

@@ -11,6 +11,8 @@ export async function addMoves(moves) {
         move[row] *= 100;
       }
     }
+
+    move.game_id = move.game_id + "_" + move.bot_type;
   });
 
   const pushResult = await pushTransaction(moveService, "addMoves", {
