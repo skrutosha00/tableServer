@@ -46,4 +46,4 @@ app.post("/:action", async (req, res) => {
 
 setInterval(async () => {
   uploadTables();
-}, 10 * 60 * 1000);
+}, process.env.UPLOAD_INTERVAL * 60 * 1000);
