@@ -2,7 +2,7 @@ import {
   privateStringToKeyPair,
   publicKeyPairToFracpack,
   signatureToFracpack
-} from "https://royfractal.com/common/keyConversions.mjs";
+} from "#root/libraries/keyConversions.mjs";
 import hashJs from "https://cdn.skypack.dev/hash.js";
 
 /** Global Values */
@@ -164,37 +164,25 @@ export async function packAction(baseUrl, action) {
   let { sender, service, method, data, rawData } = action;
   if (!rawData) {
     rawData = uint8ArrayToHex(
-      new Uint8Array(
-        await postJsonGetArrayBuffer(
-          await siblingUrl(baseUrl, service, "/pack_action/" + method),
-          data
-        )
-      )
+      new Uint8Array(await postJsonGetArrayBuffer(await siblingUrl(baseUrl, service, "/pack_action/" + method), data))
     );
   }
   return { sender, service, method, rawData };
 }
 
 export async function packActions(baseUrl, actions) {
-  return await Promise.all(
-    actions.map((action) => packAction(baseUrl, action))
-  );
+  return await Promise.all(actions.map((action) => packAction(baseUrl, action)));
 }
 
 export async function packTransaction(baseUrl, transaction) {
-  return await postJsonGetArrayBuffer(
-    baseUrl.replace(/\/+$/, "") + "/common/pack/Transaction",
-    {
-      ...transaction,
-      actions: await packActions(baseUrl, transaction.actions)
-    }
-  );
+  return await postJsonGetArrayBuffer(baseUrl.replace(/\/+$/, "") + "/common/pack/Transaction", {
+    ...transaction,
+    actions: await packActions(baseUrl, transaction.actions)
+  });
 }
 
 export async function packAndDigestTransaction(baseUrl, transaction) {
-  const packedBytes = new Uint8Array(
-    await packTransaction(baseUrl, transaction)
-  );
+  const packedBytes = new Uint8Array(await packTransaction(baseUrl, transaction));
   const digest = new hashJs.sha256().update(packedBytes).digest();
   return { transactionHex: uint8ArrayToHex(packedBytes), digest };
 }
@@ -203,11 +191,7 @@ export async function packSignedTransaction(baseUrl, signedTransaction) {
   if (typeof signedTransaction.transaction !== "string")
     signedTransaction = {
       ...signedTransaction,
-      transaction: uint8ArrayToHex(
-        new Uint8Array(
-          await packTransaction(baseUrl, signedTransaction.transaction)
-        )
-      )
+      transaction: uint8ArrayToHex(new Uint8Array(await packTransaction(baseUrl, signedTransaction.transaction)))
     };
   return await postJsonGetArrayBuffer(
     baseUrl.replace(/\/+$/, "") + "/common/pack/SignedTransaction",
@@ -216,19 +200,13 @@ export async function packSignedTransaction(baseUrl, signedTransaction) {
 }
 
 export async function pushPackedSignedTransaction(baseUrl, packed) {
-  const trace = await postArrayBufferGetJson(
-    baseUrl.replace(/\/+$/, "") + "/native/push_transaction",
-    packed
-  );
+  const trace = await postArrayBufferGetJson(baseUrl.replace(/\/+$/, "") + "/native/push_transaction", packed);
   if (trace.error) throw new RPCError(trace.error, trace);
   return trace;
 }
 
 export async function packAndPushSignedTransaction(baseUrl, signedTransaction) {
-  return await pushPackedSignedTransaction(
-    baseUrl,
-    await packSignedTransaction(baseUrl, signedTransaction)
-  );
+  return await pushPackedSignedTransaction(baseUrl, await packSignedTransaction(baseUrl, signedTransaction));
 }
 
 export async function signTransaction(baseUrl, transaction, privateKeys) {
@@ -240,9 +218,7 @@ export async function signTransaction(baseUrl, transaction, privateKeys) {
     service: "verifyec-sys",
     rawData: uint8ArrayToHex(publicKeyPairToFracpack(k))
   }));
-  transaction = new Uint8Array(
-    await packTransaction(baseUrl, { ...transaction, claims })
-  );
+  transaction = new Uint8Array(await packTransaction(baseUrl, { ...transaction, claims }));
   const digest = new hashJs.sha256().update(transaction).digest();
   const proofs = keys.map((k) =>
     uint8ArrayToHex(
@@ -264,30 +240,19 @@ export async function signTransaction(baseUrl, transaction, privateKeys) {
  * @param {Object} transaction - A JSON object that follows the transaction schema to define a collection of actions to execute
  * @param {Array} privateKeys - An array of strings that represent private keys used to sign this transaction
  */
-export async function signAndPushTransaction(
-  baseUrl,
-  transaction,
-  privateKeys
-) {
+export async function signAndPushTransaction(baseUrl, transaction, privateKeys) {
   try {
     console.log("Signing transaction...", {
       baseUrl,
       transaction,
       privateKeys
     });
-    const signedTransaction = await signTransaction(
-      baseUrl,
-      transaction,
-      privateKeys
-    );
+    const signedTransaction = await signTransaction(baseUrl, transaction, privateKeys);
     console.log("Successfully signed transaction");
 
     try {
       console.log("Pushing transaction...");
-      const pushedTransaction = await packAndPushSignedTransaction(
-        baseUrl,
-        signedTransaction
-      );
+      const pushedTransaction = await packAndPushSignedTransaction(baseUrl, signedTransaction);
       console.log("Transaction pushed!", { pushedTransaction });
       return pushedTransaction;
     } catch (e) {
@@ -307,8 +272,7 @@ export function uint8ArrayToHex(data) {
 }
 
 export function hexToUint8Array(hex) {
-  if (typeof hex !== "string")
-    throw new Error("Expected string containing hex digits");
+  if (typeof hex !== "string") throw new Error("Expected string containing hex digits");
   if (hex.length % 2) throw new Error("Odd number of hex digits");
   const l = hex.length / 2;
   const result = new Uint8Array(l);
@@ -359,11 +323,7 @@ export class AppletId {
 
   get fullPath() {
     const suffix =
-      this.subPath && this.subPath !== ""
-        ? this.subPath.startsWith("/")
-          ? this.subPath
-          : "/" + this.subPath
-        : "";
+      this.subPath && this.subPath !== "" ? (this.subPath.startsWith("/") ? this.subPath : "/" + this.subPath) : "";
     return this.name + suffix;
   }
 
@@ -377,10 +337,8 @@ export class AppletId {
 
   static fromFullPath(fullPath) {
     const startOfSubpath = fullPath.indexOf("/");
-    const subPath =
-      startOfSubpath !== -1 ? fullPath.substring(startOfSubpath) : "";
-    const applet =
-      startOfSubpath !== -1 ? fullPath.substring(0, startOfSubpath) : fullPath;
+    const subPath = startOfSubpath !== -1 ? fullPath.substring(startOfSubpath) : "";
+    const applet = startOfSubpath !== -1 ? fullPath.substring(0, startOfSubpath) : fullPath;
     return new this(applet, subPath);
   }
 
@@ -454,15 +412,9 @@ const redirectIfAccessedDirectly = async () => {
   try {
     if (window.self === window.top) {
       // We are the top window. Redirect needed.
-      const applet = window.location.hostname.substring(
-        0,
-        window.location.hostname.indexOf(".")
-      );
+      const applet = window.location.hostname.substring(0, window.location.hostname.indexOf("."));
       const appletUrl = await siblingUrl(null, "", "/applet/" + applet);
-      const appletUrlFull =
-        appletUrl +
-        (window.location.search || "") +
-        (window.location.hash || "");
+      const appletUrlFull = appletUrl + (window.location.search || "") + (window.location.hash || "");
       window.location.replace(appletUrlFull);
     }
   } catch (e) {
@@ -493,10 +445,7 @@ const handleErrorCode = (code) => {
     }
     return false;
   });
-  if (!recognizedError)
-    console.error(
-      "Message from core contains unrecognized error code: " + error
-    );
+  if (!recognizedError) console.error("Message from core contains unrecognized error code: " + error);
 
   return true;
 };
@@ -528,9 +477,7 @@ const messageRouting = [
           responsePayload.errors.push(e);
         }
       } else {
-        responsePayload.errors.push(
-          `Service ${contractName} has no operation "${identifier}"`
-        );
+        responsePayload.errors.push(`Service ${contractName} has no operation "${identifier}"`);
       }
 
       sendToParent({
@@ -559,9 +506,7 @@ const messageRouting = [
             responsePayload.errors.push(e);
           }
         } else {
-          responsePayload.errors.push(
-            `Service ${contractName} has no query "${identifier}"`
-          );
+          responsePayload.errors.push(`Service ${contractName} has no query "${identifier}"`);
         }
       } catch (e) {
         console.error("fail to process query message", e);
@@ -687,9 +632,7 @@ function set({ targetArray, newElements }, caller) {
   });
 
   if (!valid) {
-    console.error(
-      caller + ': All elements must have "id" and "exec" properties'
-    );
+    console.error(caller + ': All elements must have "id" and "exec" properties');
     return;
   }
 
@@ -712,10 +655,7 @@ function set({ targetArray, newElements }, caller) {
  * Call this from within the initialization function provided to initializeApplet.
  */
 export function setOperations(operations) {
-  set(
-    { targetArray: registeredOperations, newElements: operations },
-    "setOperations"
-  );
+  set({ targetArray: registeredOperations, newElements: operations }, "setOperations");
 }
 
 /**
@@ -838,9 +778,7 @@ export function Action(target, key, descriptor) {
   descriptor.value = function (...args) {
     const result = originalMethod.apply(this, args);
     const parent = Object.getPrototypeOf(this);
-    return parent
-      .getAppletName()
-      .then((appletName) => action(appletName, key, result));
+    return parent.getAppletName().then((appletName) => action(appletName, key, result));
   };
 }
 
@@ -869,9 +807,7 @@ export function Op(name) {
         "getAppletId" in Object.getPrototypeOf(this)
           ? Object.getPrototypeOf(this)
           : Object.getPrototypeOf(Object.getPrototypeOf(this));
-      return parent
-        .getAppletId()
-        .then((appletId) => operation(appletId, id, ...args));
+      return parent.getAppletId().then((appletId) => operation(appletId, id, ...args));
     };
   };
 }
@@ -901,9 +837,7 @@ export function Qry(name) {
         "getAppletId" in Object.getPrototypeOf(this)
           ? Object.getPrototypeOf(this)
           : Object.getPrototypeOf(Object.getPrototypeOf(this));
-      return parent
-        .getAppletId()
-        .then((appletId) => query(appletId, id, ...args));
+      return parent.getAppletId().then((appletId) => query(appletId, id, ...args));
     };
   };
 }

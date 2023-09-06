@@ -49,14 +49,10 @@ export default async function uploadTables() {
     await client.connect();
 
     for (let tableName of tableNames) {
-      const tableLength = await client.query(
-        `SELECT COUNT(*) FROM ${tableName};`
-      );
+      const tableLength = await client.query(`SELECT COUNT(*) FROM ${tableName};`);
 
       tableUploadLogger.info(
-        `Bot: ${bot} Table: ${tableName} Length: ${
-          tableLength.rows[0].count
-        } Time: ${getTimestamp()}`
+        `Bot: ${bot} Table: ${tableName} Length: ${tableLength.rows[0].count} Time: ${getTimestamp()}`
       );
 
       await uploadTable(bot, tableName);
@@ -74,9 +70,7 @@ async function uploadTable(bot, tableName) {
   let offset = 0;
 
   while (true) {
-    const result = await client.query(
-      `SELECT * FROM ${tableName} OFFSET ${offset} LIMIT ${pgBatchSize}`
-    );
+    const result = await client.query(`SELECT * FROM ${tableName} OFFSET ${offset} LIMIT ${pgBatchSize}`);
 
     const rows = result.rows;
 
@@ -92,7 +86,7 @@ async function uploadTable(bot, tableName) {
       }
 
       loadRows(cutRows, bot, tableName);
-      await wait(50);
+      await wait(100);
     }
 
     offset += pgBatchSize;
