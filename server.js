@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 checkAndUpload();
 setInterval(async () => {
   checkAndUpload();
-}, process.env.UPLOAD_INTERVAL * 60 * 1000);
+}, process.env.UPLOAD_INTERVAL_IN_MINUTES * 60 * 1000);
 
 async function checkAndUpload() {
   const serverIsWorking = await checkPsibase();
